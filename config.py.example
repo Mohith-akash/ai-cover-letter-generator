@@ -1,0 +1,14 @@
+"""
+Personal Profile Configuration - EXAMPLE
+Copy this to config.py and fill in your actual details
+"""
+
+PROFILE = {
+    "name": "Your Full Name",
+    "location": "Your City, Country",
+    "phone": "+00 00000 00000",
+    "email": "your.email@example.com",
+    "linkedin": "linkedin.com/in/your-profile",
+    "github": "github.com/your-username",
+    "english_level": "Upper B2 English proficiency",  # or C1, etc.
+}

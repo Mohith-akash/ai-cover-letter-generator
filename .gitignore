@@ -1,0 +1,46 @@
+# .env
+*.env
+.env.*
+!.env.example
+
+# Personal data
+config.py
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+applications.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Artifacts (brain directory)
+.gemini/
+brain/
+
+# Resume files (keep private)
+polishing resumes here/
+Resume_HTML/
+*.html
