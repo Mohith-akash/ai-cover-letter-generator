@@ -53,7 +53,7 @@ def review_cover_letter(text: str) -> dict:
     if has_numbers:
         issues.append({"type": "metrics", "message": "Good use of specific numbers/metrics", "severity": "pass"})
     else:
-        issues.append({"type": "metrics", "message": "Add specific numbers (e.g., '13M rows', '10x faster')", "severity": "warning"})
+        issues.append({"type": "metrics", "message": "Add specific numbers (e.g., '16M rows', '10x faster')", "severity": "warning"})
         score -= 10
     
     # First person overuse

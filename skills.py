@@ -169,7 +169,7 @@ SKILLS_DATABASE = {
         "level": "advanced"
     },
     "dbt": {
-        "proof": "dbt Core transformation layers for 13M+ rows with staging + marts",
+        "proof": "dbt Core transformation layers for 16M+ rows with staging + marts",
         "projects": ["Vortex", "GDELT"],
         "level": "advanced"
     },
@@ -199,7 +199,7 @@ SKILLS_DATABASE = {
         "level": "advanced"
     },
     "polars": {
-        "proof": "90% latency reduction (10x faster) processing 13M+ rows",
+        "proof": "90% latency reduction (10x faster) processing 16M+ rows",
         "projects": ["GDELT"],
         "level": "advanced"
     },
@@ -334,11 +334,11 @@ PROJECTS_DATABASE = {
     },
     "gdelt": {
         "name": "Global News Intelligence Platform",
-        "description": "Serverless ELT processing 100K+ daily events into 13M+ row warehouse",
-        "metrics": "13M+ rows, 100K+ daily events, 90% latency reduction (10x faster)",
+        "description": "Serverless ELT processing 100K+ daily events into 16M+ row warehouse",
+        "metrics": "16M+ rows, 100K+ daily events, 90% latency reduction (10x faster)",
         "tech": ["Python", "Polars", "Dagster", "dbt Core", "MotherDuck", "Great Expectations", "GitHub Actions", "Streamlit"],
         "highlights": [
-            "Processed 100K+ daily events into 13M+ row warehouse",
+            "Processed 100K+ daily events into 16M+ row warehouse",
             "90% latency reduction using Polars optimization",
             "Great Expectations-style validation checks",
             "Zero-cost deployments via Dagster + GitHub Actions"

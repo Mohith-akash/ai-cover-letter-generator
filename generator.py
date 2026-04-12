@@ -24,7 +24,7 @@ BANNED PHRASES (DO NOT USE ANY OF THESE):
 
 STYLE RULES:
 - Start with what you BUILT, not who you are
-- Use numbers: "processed 13M rows" not "processed large datasets"
+- Use numbers: "processed 16M rows" not "processed large datasets"
 - Short sentences. Under 15 words each.
 - Sound like you're texting a friend who asked about your work
 - Be specific, be direct, be human
@@ -86,13 +86,13 @@ BAD HOOK (too generic):
 "I am writing to express my interest in the Data Engineer position. I have experience with data pipelines and warehousing."
 
 BAD HOOK (grammar error - sentence fragment):
-"13 million rows of data processed with 90% latency reduction on Databricks, where I built a serverless pipeline."
+"16 million rows of data processed with 90% latency reduction on Databricks, where I built a serverless pipeline."
 
 GOOD HOOK (complete sentence, leads with I + verb):
-"I built a data warehouse processing 13 million rows with 90% latency reduction. My serverless ELT pipeline on Databricks ingests 100K+ daily events with <500ms latency."
+"I built a data warehouse processing 16 million rows with 90% latency reduction. My serverless ELT pipeline on Databricks ingests 100K+ daily events with <500ms latency."
 
 EXCELLENT HOOK (bold statement then complete sentence):
-"13 million rows. That's the scale of the Global News Intelligence Platform I built from scratch using Databricks, achieving 90% latency reduction through serverless ELT processing."
+"16 million rows. That's the scale of the Global News Intelligence Platform I built from scratch using Databricks, achieving 90% latency reduction through serverless ELT processing."
 
 {tone_instruction}
 
@@ -100,7 +100,7 @@ CRITICAL HOOK RULES:
 - Every sentence MUST be grammatically complete (Subject + Verb)
 - If starting with a number, follow with: ". That's the [noun] I [verb]..."
 - OR start with "I [verb]" for guaranteed grammar correctness
-- LEAD with your biggest/most impressive number or achievement (13M rows, 100K events, <500ms latency, 90% reduction)
+- LEAD with your biggest/most impressive number or achievement (16M rows, 100K events, <500ms latency, 90% reduction)
 - NO generic intros like "I am writing to..." or "I am excited to..."
 - First sentence = IMMEDIATE value (numbers, scale, impact)
 - Each sentence = different project or achievement
