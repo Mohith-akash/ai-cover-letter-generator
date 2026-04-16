@@ -1,8 +1,16 @@
 import streamlit as st
 import os
+import re
 import sqlite3
 from datetime import datetime
+from bs4 import BeautifulSoup
 from config import PROFILE
+from generator import generate_cover_letter, build_full_cover_letter
+from resume_profiles import get_all_scores_sorted
+from review import review_cover_letter, format_review_html
+from scraper import process_job_input
+from search import search_company_mission
+from skills import get_best_projects, match_skills_keyword, match_transferable_skills
 
 st.set_page_config(
     page_title="Job Application Toolkit",
@@ -127,7 +135,7 @@ if cerebras_key:
         from cerebras.cloud.sdk import Cerebras
         cerebras_client = Cerebras(api_key=cerebras_key)
     except Exception as e:
-        pass
+        st.warning(f"Failed to initialize Cerebras client: {e}")
 
 # Database - simplified schema
 def init_db():
@@ -148,6 +156,63 @@ def init_db():
     return conn
 
 conn = init_db()
+
+
+def _save_application(status: str):
+    """Insert a new application row with the given status."""
+    c = conn.cursor()
+    c.execute(
+        """
+            INSERT INTO applications (company, title, location, url, status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            st.session_state.job_info.get("company", ""),
+            st.session_state.job_info.get("title", ""),
+            st.session_state.job_info.get("location", ""),
+            st.session_state.job_info.get("url", ""),
+            status,
+            datetime.now().isoformat(),
+        ),
+    )
+    conn.commit()
+
+
+def _run_generation(tone, company, title, is_regeneration=False):
+    """Shared generation logic for both Generate and Regenerate buttons."""
+    if not cerebras_client:
+        st.error("Cerebras API key required!")
+        return
+    if not company or not title:
+        st.error("Please fill in Company and Job Title")
+        return
+
+    spinner_msg = "Regenerating..." if is_regeneration else "Generating..."
+    with st.spinner(spinner_msg):
+        projects = get_best_projects(st.session_state.matched_skills)
+        transferable = st.session_state.get("transferable_skills", [])
+        company_research = st.session_state.get("company_research", "")
+
+        opening = generate_cover_letter(
+            st.session_state.job_info,
+            st.session_state.matched_skills,
+            projects,
+            tone,
+            cerebras_client,
+            transferable,
+        )
+        html = build_full_cover_letter(
+            opening,
+            st.session_state.job_info,
+            st.session_state.matched_skills,
+            projects,
+            company_research,
+            cerebras_client,
+            st.session_state.get("best_cv", "data_engineer"),
+        )
+        st.session_state.cover_letter = html
+        st.session_state.step = 3
+        st.rerun()
 
 with st.sidebar:
     st.title("⚙️ API Status")
@@ -210,7 +275,6 @@ if st.session_state.step == 1:
         
         if input_content:
             with st.spinner("Analyzing..."):
-                from scraper import process_job_input
                 result = process_job_input(input_content, jina_key, cerebras_client)
                 
                 if result["success"]:
@@ -224,7 +288,6 @@ if st.session_state.step == 1:
                     st.session_state.job_info["location"] = extracted.get("location", "")
                     
                     # Match skills
-                    from skills import match_skills_keyword, match_transferable_skills
                     matched = match_skills_keyword(result["content"])
                     st.session_state.matched_skills = matched
                     
@@ -233,7 +296,6 @@ if st.session_state.step == 1:
                     st.session_state.transferable_skills = transferable
                     
                     # Match resumes to job
-                    from resume_profiles import get_all_scores_sorted
                     cv_scores = get_all_scores_sorted(result["content"])
                     st.session_state.cv_scores = cv_scores
                     st.session_state.best_cv = cv_scores[0][0] if cv_scores else None
@@ -241,7 +303,6 @@ if st.session_state.step == 1:
                     # Company research - get mission, values, objectives (positives only)
                     company_name = st.session_state.job_info.get("company", "")
                     if company_name and tavily_key:
-                        from search import search_company_mission
                         mission_result = search_company_mission(company_name, tavily_key)
                         if mission_result.get("success"):
                             st.session_state.company_research = mission_result.get("mission_values", "")
@@ -311,77 +372,13 @@ elif st.session_state.step == 2:
     
     with col1:
         if st.button("🚀 Generate Cover Letter", type="primary"):
-            if not cerebras_client:
-                st.error("Cerebras API key required!")
-            elif not company or not title:
-                st.error("Please fill in Company and Job Title")
-            else:
-                with st.spinner("Generating..."):
-                    from generator import generate_cover_letter, build_full_cover_letter
-                    from skills import get_best_projects
-                    
-                    projects = get_best_projects(st.session_state.matched_skills)
-                    transferable = st.session_state.get("transferable_skills", [])
-                    company_research = st.session_state.get("company_research", "")
-                    
-                    opening = generate_cover_letter(
-                        st.session_state.job_info,
-                        st.session_state.matched_skills,
-                        projects,
-                        tone,
-                        cerebras_client,
-                        transferable  # Pass transferable skills
-                    )
-                    html = build_full_cover_letter(
-                        opening,
-                        st.session_state.job_info,
-                        st.session_state.matched_skills,
-                        projects,
-                        company_research,
-                        cerebras_client,
-                        st.session_state.get("best_cv", "data_engineer")
-                    )
-                    st.session_state.cover_letter = html
-                    st.session_state.step = 3
-                    st.rerun()
-    
+            _run_generation(tone, company, title, is_regeneration=False)
+
     with col2:
         # Regenerate button if already generated
         if st.session_state.get("cover_letter"):
             if st.button("🔄 Regenerate (New Version)"):
-                if not cerebras_client:
-                    st.error("Cerebras API key required!")
-                elif not company or not title:
-                    st.error("Please fill in Company and Job Title")
-                else:
-                    with st.spinner("Regenerating..."):
-                        from generator import generate_cover_letter, build_full_cover_letter
-                        from skills import get_best_projects
-                        
-                        projects = get_best_projects(st.session_state.matched_skills)
-                        transferable = st.session_state.get("transferable_skills", [])
-                        company_research = st.session_state.get("company_research", "")
-                        
-                        opening = generate_cover_letter(
-                            st.session_state.job_info,
-                            st.session_state.matched_skills,
-                            projects,
-                            tone,
-                            cerebras_client,
-                            transferable
-                        )
-                        html = build_full_cover_letter(
-                            opening,
-                            st.session_state.job_info,
-                            st.session_state.matched_skills,
-                            projects,
-                            company_research,
-                            cerebras_client,
-                            st.session_state.get("best_cv", "data_engineer")  # Resume type
-                        )
-                        st.session_state.cover_letter = html
-                        st.session_state.step = 3
-                        st.rerun()
+                _run_generation(tone, company, title, is_regeneration=True)
     
     with col3:
         if st.button("← Back"):
@@ -398,7 +395,6 @@ elif st.session_state.step == 3:
     st.markdown("---")
     st.subheader("📊 Professionalism Review")
     
-    from review import review_cover_letter, format_review_html
     review = review_cover_letter(st.session_state.cover_letter)
     
     # Score display
@@ -447,10 +443,7 @@ elif st.session_state.step == 3:
         st.markdown("---")
         st.subheader("📋 Plain Text for Job Portals")
         st.caption("Copy this text and paste into job application portals")
-        
-        import re
-        from bs4 import BeautifulSoup
-        
+
         soup = BeautifulSoup(st.session_state.cover_letter, 'html.parser')
         
         # Extract date
@@ -519,35 +512,13 @@ Cheers,
     
     with col1:
         if st.button("📤 I Applied!"):
-            c = conn.cursor()
-            c.execute("""
-                INSERT INTO applications (company, title, location, url, status, created_at)
-                VALUES (?, ?, ?, ?, 'Applied', ?)
-            """, (
-                st.session_state.job_info.get("company", ""),
-                st.session_state.job_info.get("title", ""),
-                st.session_state.job_info.get("location", ""),
-                st.session_state.job_info.get("url", ""),
-                datetime.now().isoformat()
-            ))
-            conn.commit()
+            _save_application("Applied")
             st.success("✅ Saved!")
             st.balloons()
-    
+
     with col2:
         if st.button("📌 Save for Later"):
-            c = conn.cursor()
-            c.execute("""
-                INSERT INTO applications (company, title, location, url, status, created_at)
-                VALUES (?, ?, ?, ?, 'Saved', ?)
-            """, (
-                st.session_state.job_info.get("company", ""),
-                st.session_state.job_info.get("title", ""),
-                st.session_state.job_info.get("location", ""),
-                st.session_state.job_info.get("url", ""),
-                datetime.now().isoformat()
-            ))
-            conn.commit()
+            _save_application("Saved")
             st.success("✅ Saved for later!")
 
 # Footer

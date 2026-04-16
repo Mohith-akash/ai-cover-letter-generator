@@ -37,7 +37,7 @@ def search_company_mission(company_name: str, api_key: str = None) -> dict:
                 data = response.json()
                 all_results.append(data.get("answer", ""))
         except Exception as e:
-            pass
+            print(f"[WARN] Tavily search failed for query {query!r}: {e}")
     
     # Filter out None values first
     all_results = [r for r in all_results if r is not None]

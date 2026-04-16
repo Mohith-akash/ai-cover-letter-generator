@@ -61,7 +61,7 @@ def scrape_job_url(url: str, jina_api_key: str = None) -> dict:
                 "method": "jina"
             }
     except Exception as e:
-        pass  # Fall through to fallback
+        print(f"[WARN] Jina scrape failed for {url}, falling back to direct scrape: {e}")
     
     # Fallback to direct scraping
     print("Jina failed, trying direct scrape...")

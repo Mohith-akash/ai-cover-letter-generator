@@ -1,3 +1,4 @@
+import re
 
 # Tool alternatives - if job asks for X and you have Y, mention Y as transferable
 TOOL_ALTERNATIVES = {
@@ -376,7 +377,7 @@ def match_skills_keyword(job_text: str) -> list:
     matches = []
     
     for skill, data in SKILLS_DATABASE.items():
-        if skill in job_lower:
+        if re.search(r'\b' + re.escape(skill) + r'\b', job_lower):
             matches.append({
                 "skill": skill,
                 "proof": data["proof"],
@@ -411,12 +412,32 @@ def match_transferable_skills(job_text: str) -> list:
 
 
 def get_best_projects(matched_skills: list, top_k: int = 3) -> list:
-    core_projects = ["gdelt", "vortex", "olist"]
-    
-    result = []
-    for project_id in core_projects:
-        if project_id in PROJECTS_DATABASE:
-            result.append(PROJECTS_DATABASE[project_id])
-    
-    return result
+    """
+    Rank projects by overlap between their tech stack and the matched job skills.
+    Falls back to a stable default ordering when there are no matched skills.
+    """
+    default_order = ["gdelt", "vortex", "olist", "gkg"]
+
+    # Normalize matched skill names for case-insensitive comparison
+    skill_names = {
+        (s.get("skill") if isinstance(s, dict) else str(s)).lower()
+        for s in (matched_skills or [])
+    }
+
+    def overlap_count(project: dict) -> int:
+        tech_lower = {t.lower() for t in project.get("tech", [])}
+        return len(skill_names & tech_lower)
+
+    # Build list of (project_id, project) preserving default order as tiebreaker
+    scored = []
+    for idx, project_id in enumerate(default_order):
+        if project_id not in PROJECTS_DATABASE:
+            continue
+        project = PROJECTS_DATABASE[project_id]
+        scored.append((overlap_count(project), -idx, project))
+
+    # Sort: highest overlap first, then default order
+    scored.sort(key=lambda x: (-x[0], -x[1]))
+
+    return [project for _, _, project in scored[:top_k]]
 

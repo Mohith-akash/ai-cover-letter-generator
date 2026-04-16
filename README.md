@@ -22,12 +22,11 @@
 
 ```
 Python 3.11+ • Streamlit
-Cerebras (Llama 3.1) • Voyage AI • Tavily • Jina Reader
+Cerebras (Llama 3.1) • Tavily • Jina Reader
 ```
 
 **Why this stack:**
 - Cerebras: Free tier, fast inference
-- Voyage: Skill embeddings for matching
 - Tavily: Company research without scraping
 - Streamlit: Local deployment, no backend
 
@@ -44,7 +43,7 @@ cp config.py.example config.py   # Add your info
 streamlit run app.py
 ```
 
-**API Keys (all free tier):** [Cerebras](https://cloud.cerebras.ai) • [Voyage](https://www.voyageai.com) • [Tavily](https://tavily.com) • [Jina](https://jina.ai/reader)
+**API Keys (all free tier):** [Cerebras](https://cloud.cerebras.ai) • [Tavily](https://tavily.com) • [Jina](https://jina.ai/reader)
 
 ## Supported Roles
 
@@ -91,7 +90,7 @@ Different keywords bolded based on matched resume:
 
 1. **Scrape** - Jina Reader extracts job posting
 2. **Translate** - Auto-detects language, translates if needed
-3. **Match** - Semantic search finds best resume (4 types)
+3. **Match** - Keyword matching finds best resume (4 types)
 4. **Research** - Tavily finds company mission/values (positives only)
 5. **Generate** - Cerebras LLM creates opening paragraph with your metrics
 6. **Review** - A-F professionalism grade with suggestions
